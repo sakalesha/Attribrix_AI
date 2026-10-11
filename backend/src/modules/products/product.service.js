@@ -1,12 +1,14 @@
+// Acts as a business logic layer for product-related operations. 
+// It orchestrates the interaction between the frontend and the ML service.
+
 const { v4: uuidv4 } = require('uuid');
 const mlClient = require('../../integrations/mlClient');
 const { getPool } = require('../../config/db');
 const logger = require('../../utils/logger');
 
+// It is the glue between the controller (routes) and the ML service (microservice).
 class ProductService {
-  /**
-   * Orchestrates multi-image analysis: calls ML service, prepares product metadata
-   */
+  // Orchestrates multi-image analysis: calls ML service, prepares product metadata
   async analyzeProductImages(files) {
     if (!files || files.length === 0) {
       const err = new Error('No images provided for product analysis');
@@ -15,6 +17,7 @@ class ProductService {
     }
 
     const productId = uuidv4();
+    // It creates an array of file paths from the uploaded files.
     const filePaths = files.map((f) => f.path);
 
     logger.info(`Analyzing ${files.length} images for product ${productId}`);
@@ -34,9 +37,7 @@ class ProductService {
     };
   }
 
-  /**
-   * Save human review and approval
-   */
+  // Save human review and approval
   async saveReview(productId, reviewData) {
     logger.info(`Saving review for product ${productId}`, { reviewData });
     // In later phases, this persists to PostgreSQL review_events & products tables
@@ -49,9 +50,7 @@ class ProductService {
     };
   }
 
-  /**
-   * Fetch taxonomy
-   */
+  // Fetch taxonomy
   async getTaxonomy() {
     return await mlClient.getTaxonomy();
   }

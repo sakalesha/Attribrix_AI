@@ -1,12 +1,15 @@
+# It defines the image processor for the ML module.     
+
 import io
 from PIL import Image
 from typing import List, Tuple
 
+""" 
+Decodes and validates raw bytes into a PIL Image. 
+Converts RGBA or grayscale to RGB.
+Validates file integrity. 
+"""
 def validate_and_decode_image(image_bytes: bytes) -> Image.Image:
-    """
-    Decodes and validates raw bytes into a PIL Image.
-    Converts RGBA or grayscale to RGB.
-    """
     try:
         img = Image.open(io.BytesIO(image_bytes))
         img.verify()  # Verify file integrity
@@ -18,10 +21,10 @@ def validate_and_decode_image(image_bytes: bytes) -> Image.Image:
     except Exception as e:
         raise ValueError(f"Invalid or corrupted image: {str(e)}")
 
+"""
+Prepares a batch of image byte buffers for processing.
+"""
 def prepare_image_batch(images_bytes_list: List[bytes]) -> List[Image.Image]:
-    """
-    Decodes and validates a batch of image byte buffers.
-    """
     decoded = []
     for idx, b in enumerate(images_bytes_list):
         try:

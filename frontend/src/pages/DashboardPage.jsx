@@ -49,8 +49,10 @@ export default function DashboardPage() {
         attributes: {
           color: { value: formData.color, status: 'verified', source: 'user' },
           pattern: { value: formData.pattern, status: 'verified', source: 'user' },
+          material: { value: formData.material, status: 'verified', source: 'user' },
+          sleeve_type: { value: formData.sleeve_type, status: 'verified', source: 'user' },
+          neckline: { value: formData.neckline, status: 'verified', source: 'user' },
           brand: { value: formData.brand, status: formData.brand ? 'verified' : 'unknown', source: 'user' },
-          material: { value: formData.material, status: formData.material ? 'verified' : 'unknown', source: 'user' },
         },
       });
       setSavedSuccess(true);

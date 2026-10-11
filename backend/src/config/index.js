@@ -1,3 +1,5 @@
+// Single Source of Truth for all application settings and environment variables
+
 require('dotenv').config();
 
 const config = {

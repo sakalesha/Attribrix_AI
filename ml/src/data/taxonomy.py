@@ -1,5 +1,5 @@
 """
-Taxonomy and Controlled Vocabularies for Attribrix AI.
+Define taxonomy and Controlled Vocabularies for ML module.
 Locked according to context/Decisions.md and context/memory.md.
 """
 

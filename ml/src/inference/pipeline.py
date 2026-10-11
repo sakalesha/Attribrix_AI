@@ -1,3 +1,5 @@
+# It is to predict the category and attributes of a given image. 
+
 from typing import List, Dict, Any, Optional
 from PIL import Image
 
@@ -17,6 +19,7 @@ from ..data.schemas import (
 )
 from ..models.clip_model import clip_wrapper
 
+# It is to predict the category and attributes of a given image. 
 class InferencePipeline:
     def __init__(self):
         self.category_labels = list(CATEGORIES.keys())
@@ -25,7 +28,13 @@ class InferencePipeline:
         ]
         self.color_prompts = [f"a photo of a {c} garment" for c in COLOR_VALUES if c != "unknown"]
         self.pattern_prompts = [f"a photo with {p} pattern" for p in PATTERN_VALUES if p != "unknown"]
+        self.material_prompts = [f"a photo of {m} texture fabric garment" for m in MATERIAL_VALUES if m != "unknown"]
+        self.sleeve_prompts = [f"a photo of a {s.replace('_', ' ')} garment" for s in SLEEVE_VALUES if s not in ["unknown", "not_applicable"]]
+        self.neckline_prompts = [f"a photo of a garment with {n.replace('_', ' ')}" for n in NECKLINE_VALUES if n not in ["unknown", "not_applicable"]]
 
+    # It runs the pipeline.
+    # Input: images (list of PIL images), product_id (optional string) 
+    # Output: ProductPredictionResponse
     def run(self, images: List[Image.Image], product_id: Optional[str] = None) -> ProductPredictionResponse:
         # 1. Predict category
         cat_scores = clip_wrapper.predict_candidates(images, self.category_prompts)
@@ -46,7 +55,25 @@ class InferencePipeline:
         pred_pattern = [p for p in PATTERN_VALUES if p != "unknown"][top_pattern_idx]
         pattern_conf = round(pattern_scores[0]["score"], 4)
 
-        # 4. Construct attributes conforming to Pydantic schema
+        # 4. Predict material (candidate scoring even if low confidence)
+        mat_scores = clip_wrapper.predict_candidates(images, self.material_prompts)
+        top_mat_idx = self.material_prompts.index(mat_scores[0]["label"])
+        pred_material = [m for m in MATERIAL_VALUES if m != "unknown"][top_mat_idx]
+        mat_conf = round(mat_scores[0]["score"], 4)
+
+        # 5. Predict sleeve type (for apparel)
+        sleeve_scores = clip_wrapper.predict_candidates(images, self.sleeve_prompts)
+        top_sleeve_idx = self.sleeve_prompts.index(sleeve_scores[0]["label"])
+        pred_sleeve = [s for s in SLEEVE_VALUES if s not in ["unknown", "not_applicable"]][top_sleeve_idx]
+        sleeve_conf = round(sleeve_scores[0]["score"], 4)
+
+        # 6. Predict neckline
+        neck_scores = clip_wrapper.predict_candidates(images, self.neckline_prompts)
+        top_neck_idx = self.neckline_prompts.index(neck_scores[0]["label"])
+        pred_neckline = [n for n in NECKLINE_VALUES if n not in ["unknown", "not_applicable"]][top_neck_idx]
+        neck_conf = round(neck_scores[0]["score"], 4)
+
+        # 7. Construct attributes conforming to Pydantic schema
         attributes = ProductAttributes(
             color=AttributeItem(
                 value=pred_color,
@@ -60,23 +87,23 @@ class InferencePipeline:
                 source="clip",
                 status="suggested" if pattern_conf >= 0.5 else "needs_review",
             ),
+            material=AttributeItem(
+                value=pred_material,
+                confidence=mat_conf,
+                source="clip",
+                status="suggested" if mat_conf >= 0.5 else "needs_review",
+            ),
             sleeve_type=AttributeItem(
-                value=None,
-                confidence=None,
-                source="not_observed",
-                status="unknown",
+                value=pred_sleeve,
+                confidence=sleeve_conf,
+                source="clip",
+                status="suggested" if sleeve_conf >= 0.5 else "needs_review",
             ),
             neckline=AttributeItem(
-                value=None,
-                confidence=None,
-                source="not_observed",
-                status="unknown",
-            ),
-            material=AttributeItem(
-                value=None,
-                confidence=None,
-                source="not_observed",
-                status="unknown",
+                value=pred_neckline,
+                confidence=neck_conf,
+                source="clip",
+                status="suggested" if neck_conf >= 0.5 else "needs_review",
             ),
             brand=AttributeItem(
                 value=None,

@@ -1,3 +1,5 @@
+# It is the API routes for the ML service. 
+
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, status
 from typing import List, Optional
 
@@ -17,6 +19,7 @@ from ..models.clip_model import clip_wrapper
 
 router = APIRouter()
 
+# It is the health check function. 
 @router.get("/health", response_model=HealthResponse)
 def health_check():
     return HealthResponse(
@@ -29,10 +32,12 @@ def health_check():
         },
     )
 
+# It is the health check function for the API. 
 @router.get("/api/v1/health", response_model=HealthResponse)
 def api_v1_health_check():
     return health_check()
 
+# It is the function to get the taxonomy. 
 @router.get("/api/v1/taxonomy")
 def get_taxonomy():
     return {
@@ -47,6 +52,7 @@ def get_taxonomy():
         },
     }
 
+# It is the function to predict the category and attributes of a given image. 
 @router.post("/api/v1/predict", response_model=ProductPredictionResponse)
 async def predict_product(
     images: List[UploadFile] = File(...),

@@ -1,17 +1,18 @@
+// Acts as a client for the ML service, providing methods to interact with the ML service.
+
 const axios = require('axios');
 const FormData = require('form-data');
 const fs = require('fs');
 const config = require('../config');
 const logger = require('../utils/logger');
 
+// Handles communication with the separate ML service.
 class MLClient {
   constructor() {
     this.baseUrl = config.mlServiceUrl;
   }
 
-  /**
-   * Health check on ML service
-   */
+  // Health check on ML service
   async checkHealth() {
     try {
       const response = await axios.get(`${this.baseUrl}/health`, { timeout: 5000 });
@@ -22,9 +23,7 @@ class MLClient {
     }
   }
 
-  /**
-   * Fetch supported taxonomy from ML service
-   */
+  // Fetch supported taxonomy from ML service
   async getTaxonomy() {
     try {
       const response = await axios.get(`${this.baseUrl}/api/v1/taxonomy`, { timeout: 5000 });
@@ -35,11 +34,7 @@ class MLClient {
     }
   }
 
-  /**
-   * Send product images to ML service for category and attribute prediction
-   * @param {Array<string>} filePaths - Array of local paths to image files
-   * @param {Object} options - Optional context parameters
-   */
+  // Send product images to ML service for category and attribute prediction
   async predictProduct(filePaths, options = {}) {
     try {
       const formData = new FormData();

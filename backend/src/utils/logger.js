@@ -1,3 +1,5 @@
+// Acts as a centralized logger for the backend service, providing consistent log formatting and environment-aware debug output.
+
 const logger = {
   info: (msg, meta) => console.log(`[INFO] ${new Date().toISOString()} - ${msg}`, meta ? meta : ''),
   warn: (msg, meta) => console.warn(`[WARN] ${new Date().toISOString()} - ${msg}`, meta ? meta : ''),

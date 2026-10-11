@@ -1,3 +1,5 @@
+// It tests the health endpoints of the backend module.
+
 const request = require('supertest');
 const app = require('../src/app');
 

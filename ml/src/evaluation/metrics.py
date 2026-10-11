@@ -5,6 +5,9 @@ Evaluates category accuracy, per-attribute precision/recall/F1 on held-out test 
 from typing import List, Dict, Any
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support, classification_report
 
+# It evaluates the category accuracy, per-attribute precision/recall/F1 on held-out test splits. 
+# Input: y_true (list of true labels), y_pred (list of predicted labels) 
+# Output: Dictionary with accuracy, precision, recall, f1, and detailed report
 def evaluate_categories(y_true: List[str], y_pred: List[str]) -> Dict[str, Any]:
     acc = accuracy_score(y_true, y_pred)
     p, r, f1, _ = precision_recall_fscore_support(y_true, y_pred, average="macro", zero_division=0)
@@ -17,6 +20,9 @@ def evaluate_categories(y_true: List[str], y_pred: List[str]) -> Dict[str, Any]:
         "detailed_report": report,
     }
 
+# It evaluates the per-attribute precision/recall/F1 on held-out test splits. 
+# Input: y_true_dict (dictionary of true labels), y_pred_dict (dictionary of predicted labels) 
+# Output: Dictionary with per-attribute precision/recall/F1 and macro average attribute F1 
 def evaluate_attributes(y_true_dict: Dict[str, List[str]], y_pred_dict: Dict[str, List[str]]) -> Dict[str, Any]:
     results = {}
     f1_scores = []

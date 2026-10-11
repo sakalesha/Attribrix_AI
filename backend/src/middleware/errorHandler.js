@@ -1,3 +1,5 @@
+// Acts as a centralized error handling middleware for the backend service, providing consistent error logging and formatted JSON responses.
+
 const logger = require('../utils/logger');
 
 function errorHandler(err, req, res, next) {

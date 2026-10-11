@@ -1,3 +1,5 @@
+// It handles HTTP requests related to authentication and returns the authentication status.
+
 class AuthController {
   async status(req, res) {
     res.json({

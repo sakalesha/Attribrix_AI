@@ -1,3 +1,5 @@
+// It defines the server for the backend module. It handles HTTP requests and responses.
+
 const app = require('./app');
 const config = require('./config');
 const logger = require('./utils/logger');

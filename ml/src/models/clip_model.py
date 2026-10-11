@@ -1,19 +1,25 @@
+"""
+Wrapper for CLIP model.
+
+Uses transformers to load a pretrained CLIP model for zero-shot classification.
+Supports both GPU and CPU with automatic device selection.
+"""
+
 import os
 from typing import List, Dict, Any, Optional
-from PIL import Image
+from PIL import Image 
 
+# It loads the CLIP model and processor lazily. 
 class CLIPModelWrapper:
     def __init__(self, model_name: str = "openai/clip-vit-base-patch32", device: str = "cpu"):
         self.model_name = model_name
         self.device = device
         self._model = None
         self._processor = None
-        self._loaded = False
+        self._loaded = False  
 
+    # Loads the CLIP model and processor lazily.   
     def load(self):
-        """
-        Loads CLIP model and processor lazily.
-        """
         if self._loaded:
             return
         try:
@@ -30,11 +36,11 @@ class CLIPModelWrapper:
     @property
     def is_loaded(self) -> bool:
         return self._loaded
-
+ 
+    # Candidates means? It is the list of possible attributes for the given images. 
+    # For example, if the image is of a red car, the candidates could be "red", "blue", "green", "yellow", "black", "white", etc. 
+    # The function will return the probability of each candidate being the correct attribute. 
     def predict_candidates(self, images: List[Image.Image], candidate_texts: List[str]) -> List[Dict[str, float]]:
-        """
-        Scores candidate text descriptions against the given images.
-        """
         if not self._loaded:
             # Fallback heuristic for testing/scaffolding
             return [{"label": c, "score": 1.0 / len(candidate_texts)} for c in candidate_texts]

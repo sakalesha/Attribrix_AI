@@ -1,3 +1,5 @@
+// It handles HTTP requests and responses.
+
 class UserController {
   async me(req, res) {
     res.json({

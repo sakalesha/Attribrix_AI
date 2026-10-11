@@ -3,8 +3,10 @@ const config = require('./index');
 
 let pool = null;
 
+// Initializes and returns a singleton PostgreSQL connection pool with Neon SSL support.
 function getPool() {
   if (!pool) {
+    // Prevents local development connection crashes when using Neon without breaking plain local PostgreSQL fallback.
     const isNeonOrSsl =
       config.databaseUrl.includes('neon.tech') ||
       config.databaseUrl.includes('sslmode=require');
@@ -22,6 +24,7 @@ function getPool() {
   return pool;
 }
 
+// Verifies database connectivity by executing a lightweight test query ('SELECT NOW()').
 async function testConnection() {
   try {
     const client = await getPool().connect();

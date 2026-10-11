@@ -1,3 +1,5 @@
+# It is the function to test the health check endpoint. 
+
 from fastapi.testclient import TestClient
 from ml.src.main import app
 

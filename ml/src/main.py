@@ -1,3 +1,6 @@
+# It is the main file for the ML service. 
+# It is used to start the ML service. 
+
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

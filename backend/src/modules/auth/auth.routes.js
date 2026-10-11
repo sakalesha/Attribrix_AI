@@ -1,3 +1,5 @@
+// It defines the routes for the auth module.  
+
 const express = require('express');
 const router = express.Router();
 const authController = require('./auth.controller');
