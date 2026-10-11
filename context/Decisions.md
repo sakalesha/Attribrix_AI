@@ -36,7 +36,7 @@
 36: 4. **Runtime hardware:** Decide whether development and demo inference will use CPU or a supported GPU after measuring performance and installation constraints.
 37:    - **Decision:** Development and demo inference will run on a CPU.
 38: 5. **Deployment target:** Local demonstration first; select hosting and durable image storage before public release.
-39:    - **Decision:** Use Neon which will support PostgreSQL and object storage.
+39:    - **Decision:** Use Neon which supports PostgreSQL and object storage with bucket name `product-image`.
 40: 6. **Review identity and retention:** Decide whether the MVP needs reviewer accounts and how long image/review data should be retained.
 41:    - **Decision:** No reviewer accounts/user authentication required. Keep ideal limit for data retention.
 42: 7. **Upload constraints:**

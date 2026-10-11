@@ -5,9 +5,14 @@ let pool = null;
 
 function getPool() {
   if (!pool) {
+    const isNeonOrSsl =
+      config.databaseUrl.includes('neon.tech') ||
+      config.databaseUrl.includes('sslmode=require');
+    const enableSsl = config.env === 'production' || isNeonOrSsl;
+
     pool = new Pool({
       connectionString: config.databaseUrl,
-      ssl: config.env === 'production' ? { rejectUnauthorized: false } : false,
+      ssl: enableSsl ? { rejectUnauthorized: false } : false,
     });
 
     pool.on('error', (err) => {

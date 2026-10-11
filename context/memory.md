@@ -168,7 +168,7 @@ Do not use user-supplied filenames as file storage paths. Avoid collecting unnec
 165: 4. Target development/demo hardware (CPU or supported GPU), based on latency and installation testing.
 166:    - **Decision:** Development and demo inference will run on a CPU.
 167: 5. Hosting and durable image storage before public release.
-168:    - **Decision:** Use Neon for PostgreSQL and object storage.
+168:    - **Decision:** Use Neon for PostgreSQL and object storage with bucket `product-image`.
 169: 6. Whether reviewer accounts are needed and how long uploaded images/review data should be retained.
 170:    - **Decision:** No user authentication required. Data retention kept at ideal limits.
 171: 7. Upload image-count, file-size and rate limits.
