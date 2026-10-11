@@ -16,13 +16,13 @@ A seller uploads one or more images of a fashion product. The system analyzes th
 - Dataset (Hugging Face) and hosting (Neon) are selected.
 - Ready to scaffold the React frontend and FastAPI backend.
 
-## Tech Stack
-- **Frontend**: React + Vite + TypeScript + Tailwind CSS
-- **Backend**: Python + FastAPI
-- **AI/Visual Baseline**: Hugging Face Transformers + pretrained CLIP + PyTorch
-- **OCR**: PaddleOCR
-- **Database**: PostgreSQL (via Neon)
-- **Data Validation**: Pydantic
+## Tech Stack (3-Tier Microservices)
+- **Frontend**: React + Vite + Tailwind CSS (`frontend/`)
+- **Backend / BFF**: Node.js + Express (`backend/`)
+- **ML Service**: Python + FastAPI + PyTorch + CLIP + PaddleOCR (`ml/`)
+- **Database**: PostgreSQL (Neon) with JSONB for flexible attributes
+- **Data Validation**: Pydantic (Python)
+- **Evaluation**: scikit-learn (macro F1, top-1 accuracy)
 
 ## Documentation
 - [Product Requirements Document (PRD)](context/PRD.md)

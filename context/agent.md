@@ -110,64 +110,69 @@ All agent code and models must conform to the agreed taxonomies recorded in `con
 
 ---
 
-## 5. Target Codebase Architecture
+## 5. Target Codebase Architecture (3-Tier Structure)
 
-Agents should construct the repository using the following clean, modular structure:
+Agents must adhere strictly to the following 3-tier modular directory layout:
 
-```
-Attribrix_AI/
-├── backend/
-│   ├── app/
-│   │   ├── api/
-│   │   │   └── v1/
-│   │   │       ├── router.py             # Main v1 API router aggregation
-│   │   │       ├── analyze.py            # POST /products/analyze
-│   │   │       ├── products.py           # GET /products/{id}, PATCH /products/{id}/review
-│   │   │       ├── taxonomy.py           # GET /taxonomy
-│   │   │       └── health.py             # GET /health
-│   │   ├── core/
-│   │   │   ├── config.py                 # Pydantic BaseSettings & environment variables
-│   │   │   └── taxonomy.py               # Enums & controlled vocabulary definitions
-│   │   ├── db/
-│   │   │   ├── session.py                # SQLAlchemy engine & session factory
-│   │   │   └── base.py                   # Declarative base
-│   │   ├── models/
-│   │   │   ├── db_models.py              # Products, ProductImages, PredictionRuns, ReviewEvents
-│   │   │   └── schemas.py                # Pydantic request/response schemas (v1)
-│   │   ├── services/
-│   │   │   ├── clip_service.py           # CLIP model loading, prompt builder, candidate scoring
-│   │   │   ├── ocr_service.py            # PaddleOCR integration & text cleaning
-│   │   │   ├── normalizer.py             # Candidate fusion, conflict handling, metadata assembly
-│   │   │   └── storage_service.py       # Safe file upload, UUID pathing, Pillow validation
-│   │   └── main.py                       # FastAPI entrypoint, CORS, lifespan handlers
+```text
+project-root/
+│
+├── frontend/                   # React + Vite
+│   ├── public/                 # Static public assets
+│   ├── src/
+│   │   ├── assets/             # Logos, SVGs, static media
+│   │   ├── components/         # Reusable UI components (Navbar, ConfidenceBadge)
+│   │   ├── features/           # Feature-specific UI and logic (upload, review)
+│   │   ├── pages/              # Page components (DashboardPage)
+│   │   ├── layouts/            # Layout shells (MainLayout)
+│   │   ├── hooks/              # Custom React hooks (useProductAnalysis)
+│   │   ├── services/           # Backend API calls (Axios client)
+│   │   ├── context/            # React context providers (ProductContext)
+│   │   ├── utils/              # Client formatters and helpers
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   ├── package.json
+│   ├── vite.config.js
+│   ├── tailwind.config.js
+│   └── .env.example
+│
+├── backend/                    # Node.js + Express (BFF & Core API)
+│   ├── src/
+│   │   ├── config/             # Database and app configuration
+│   │   ├── modules/
+│   │   │   ├── auth/           # Authentication / session controller (open MVP)
+│   │   │   ├── users/          # User profile / role controller
+│   │   │   └── products/       # Product analysis and review endpoints
+│   │   ├── middleware/         # Multer upload & error handling
+│   │   ├── integrations/
+│   │   │   └── mlClient.js     # Communicates with Python ML service
+│   │   ├── utils/              # Logging and utility functions
+│   │   ├── app.js
+│   │   └── server.js
 │   ├── tests/
-│   │   ├── test_health.py
-│   │   ├── test_schemas.py
-│   │   ├── test_normalizer.py
-│   │   └── test_upload.py
+│   ├── package.json
+│   └── .env.example
+│
+├── ml/                         # Python / ML Service
+│   ├── src/
+│   │   ├── api/                # FastAPI prediction & health endpoints
+│   │   ├── data/               # Taxonomy, vocabularies, Pydantic schemas
+│   │   ├── preprocessing/      # Image decoding & validation (Pillow)
+│   │   ├── models/             # CLIP model wrapper and loader
+│   │   ├── inference/          # Prediction pipeline
+│   │   ├── training/           # Model training / fine-tuning (deferred)
+│   │   ├── evaluation/         # Metrics and validation (scikit-learn)
+│   │   ├── pipelines/          # End-to-end ML workflows
+│   │   └── main.py
+│   ├── tests/
 │   ├── requirements.txt
 │   └── .env.example
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── ImageUploader.tsx         # Drag-and-drop, multi-file preview & removal
-│   │   │   ├── PredictionDisplay.tsx     # Confidence badges, candidate display
-│   │   │   ├── ReviewForm.tsx            # Editable dropdowns, unknown toggles, approval CTA
-│   │   │   └── Layout.tsx
-│   │   ├── services/
-│   │   │   └── api.ts                    # Axios / fetch client for backend endpoints
-│   │   ├── types/
-│   │   │   └── product.ts                # TypeScript types synchronized with backend schemas
-│   │   ├── App.tsx
-│   │   ├── main.tsx
-│   │   └── index.css
-│   ├── package.json
-│   ├── tsconfig.json
-│   ├── vite.config.ts
-│   └── tailwind.config.js
-├── context/                              # Project governance & specifications
-├── docs/                                 # Walkthroughs, API specs, evaluation records
-└── README.md                             # Setup, execution instructions, roadmap
+│
+├── docs/                       # Architecture, API and setup docs
+├── scripts/                    # Development launchers (start-dev.bat, start-dev.sh)
+├── context/                    # Governance, PRD, architecture, and memory docs
+├── .gitignore
+└── README.md
 ```
 
 ---

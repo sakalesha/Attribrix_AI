@@ -35,19 +35,20 @@
 ## 3. Implementation Milestones
 
 ### Phase 1 — Project foundation
-**Status: NOT STARTED / NOT VERIFIED**
+**Status: IN PROGRESS / FOUNDATION SCAFFOLDED**
 
-- [ ] Create the frontend and backend project structure.
-- [ ] Set up Python environment and install initial backend dependencies.
-- [ ] Set up React + Vite + TypeScript and Tailwind CSS.
-- [ ] Add environment configuration and a safe `.env.example` (never commit real secrets).
-- [ ] Configure local PostgreSQL connection.
-- [ ] Confirm initial category taxonomy and versioned attribute schema.
-- [ ] Create Pydantic models and initial database models/migrations.
-- [ ] Add `GET /api/v1/health`.
-- [ ] Add basic automated tests for schema validation and health endpoint.
+- [x] Create the frontend, backend, and ML service project structure according to locked 3-tier skeleton.
+- [x] Set up React + Vite and Tailwind CSS (`frontend/`).
+- [x] Set up Node.js + Express backend with modular architecture, upload middleware, and `mlClient.js` (`backend/`).
+- [x] Set up Python ML microservice with FastAPI, taxonomy, Pydantic schemas, Pillow processor, CLIP wrapper, and evaluation metrics (`ml/`).
+- [x] Add environment configuration and safe `.env.example` across all 3 tiers.
+- [x] Configure PostgreSQL connection pool in `backend/src/config/db.js`.
+- [x] Confirm initial category taxonomy and versioned attribute schema in `ml/src/data/taxonomy.py` and `ml/src/data/schemas.py`.
+- [x] Add `GET /api/v1/health` and `GET /health` across backend and ML service.
+- [x] Add automated test suites for backend health and ML schemas/taxonomy.
+- [x] Add development launcher scripts in `scripts/start-dev.bat` and `scripts/start-dev.sh`.
 
-**Exit criteria:** Frontend and backend start locally; database connection works; schema validation tests pass; health endpoint returns expected status.
+**Exit criteria:** Frontend, backend, and ML service scaffolding complete; health endpoints and schema validation passing.
 
 ### Phase 2 — Image upload and storage
 **Status: NOT STARTED / NOT VERIFIED**
@@ -159,6 +160,7 @@ Add one entry for any meaningful implementation or evaluation session. Record ex
 | 2026-10-10 | Planning | Technology decisions and MVP documents drafted; actual implementation status not confirmed | Reviewed current PRD, Architecture, Decisions, UI requirements and Milestones content | Documentation cleanup and Phase 1 implementation remain to be confirmed |
 | 2026-10-10 | Planning | Resolved open decisions regarding taxonomy, hardware, hosting, dataset, and retention policies | Updated `Decisions.md` and `memory.md` with final vocabulary, hardware (CPU), hosting (Neon), dataset (Hugging Face 70/15/15), and user policies. | Ready to start Phase 1 implementation |
 | 2026-10-11 | Planning / Agent Guidance | Created `context/agent.md` as operational guide and persona specification for AI coding agents | Created `context/agent.md`, updated `memory.md` and `progress_tracker.md` references | None |
+| 2026-10-11 | Phase 1 Foundation | Scaffolded locked 3-tier folder structure (`frontend/`, `backend/`, `ml/`, `scripts/`); implemented health endpoints, `mlClient.js`, Pydantic schemas, and launch scripts | Updated `Architecture.md`, `memory.md`, `agent.md`, and `README.md` with locked 3-tier architecture | Local dependency installation (`npm install`, `pip install`) by developer |
 
 ## 7. Session Update Template
 

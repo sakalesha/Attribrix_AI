@@ -6,57 +6,120 @@
 - [Milestones](./Milestones.md) — delivery phases and release acceptance criteria
 - [System Overview](../docs/system-overview.md) — simplified walkthrough for new project contributors
 
-## 1. Proposed Technology Stack (Locked)
+## 1. Locked Technology Stack (3-Tier Service Architecture)
 
 | Layer | Technology | Responsibility |
 |---|---|---|
-| Frontend | React + Vite + TypeScript | Upload UI, results, attribute editing, review and approval |
-| Styling | Tailwind CSS | Consistent, responsive UI styling |
-| Backend API | Python + FastAPI | Upload validation, workflow orchestration, API responses |
-| Visual model | Hugging Face Transformers + pretrained CLIP | Zero-shot category and attribute candidate scoring baseline |
-| ML / inference framework | PyTorch | Model inference and possible future fine-tuning |
-| OCR | PaddleOCR | Text detection and recognition from visible labels |
-| Image utilities | Pillow; OpenCV where needed | File decoding, image validation, resizing, color conversion and image preparation |
-| Schema validation | Pydantic | Validate request/response and normalized metadata fields |
-| Database | PostgreSQL | Product, image-reference, prediction, review and evaluation records |
-| Flexible attributes | PostgreSQL JSONB | Store category-specific attribute values while preserving a consistent core schema |
-| Metrics | scikit-learn | Accuracy, precision, recall, F1 and confusion-matrix evaluation |
-| Initial file storage | Local filesystem for development | Store uploaded images and save their paths/references in PostgreSQL |
+| **Frontend** | React + Vite | Multi-image upload UI, preview, real-time prediction display, editing, and review approval |
+| **Styling** | Tailwind CSS | Consistent, responsive, accessible UI styling |
+| **Backend API / BFF** | Node.js + Express | Upload validation, file persistence, workflow orchestration, database queries, and client API |
+| **ML Client Integration** | `mlClient.js` (Axios / FormData) | Express integration client communicating with the Python ML service |
+| **ML Inference Service** | Python + FastAPI | Vision & OCR inference microservice exposing prediction and health endpoints |
+| **Visual Baseline** | Hugging Face Transformers + Pretrained CLIP | Zero-shot category and attribute candidate scoring on CPU |
+| **ML Framework** | PyTorch (CPU) | Model inference and possible future fine-tuning |
+| **OCR** | PaddleOCR | Text detection and recognition from visible garment labels |
+| **Image Utilities** | Pillow (PIL) | File decoding, image validation, resizing, and batch preparation |
+| **Schema Validation** | Pydantic (Python) | Strict schema validation for prediction outputs and taxonomy |
+| **Database** | PostgreSQL (Neon) | Product records, image references, prediction runs, and human review events |
+| **Flexible Attributes** | PostgreSQL JSONB | Category-specific attribute values alongside consistent relational keys |
+| **Metrics & Evaluation** | scikit-learn | Accuracy, macro precision, recall, F1, and confusion matrix benchmarking |
+| **File Storage** | Local filesystem (`./uploads`) / Neon Object Storage | Store uploaded product images and save verified paths in PostgreSQL |
 
 ## 2. High-Level System Architecture
 
 ```mermaid
 flowchart TD
-    A[React + Vite + TypeScript UI] -->|Upload images / request analysis| B[FastAPI Backend]
-    B --> C[Image Validation and Preprocessing\nPillow / optional OpenCV]
-    C --> D[Pretrained CLIP Inference]
-    C --> E[PaddleOCR]
-    D --> F[Attribute Processing and Normalization]
-    E --> F
-    F --> G[Pydantic Schema Validation]
-    G --> H[Structured JSON Response]
-    H --> A
-    A -->|User review and corrections| B
-    B --> I[(PostgreSQL)]
-    B --> J[Local Image Storage]
-    I --> K[Verified Dataset Export / Evaluation]
-    K --> L[Offline Benchmarking\nscikit-learn]
-    L -. Approved future model update .-> D
+    A[React + Vite Frontend\n:5173] -->|1. Upload images / review edits| B[Node.js + Express Backend\n:5000]
+    B -->|2. Forward image batch via mlClient| C[Python FastAPI ML Service\n:8000]
+    C --> D[Image Validation & Preprocessing\nPillow]
+    D --> E[Pretrained CLIP Inference\nCPU]
+    D --> F[PaddleOCR Label Reader]
+    E --> G[Attribute Normalization]
+    F --> G
+    G --> H[Pydantic Schema Validation]
+    H -->|3. Validated JSON Metadata| B
+    B --> I[(PostgreSQL / Neon)]
+    B --> J[Image Storage\n./uploads]
+    B -->|4. Structured Product Metadata| A
+    I --> K[Verified Dataset Export]
+    K --> L[Offline Evaluation\nscikit-learn]
 ```
 
 ### Processing flow
 
-1. The user selects one or more images for the same product.
-2. FastAPI validates file types, sizes, and image decodability.
-3. Pillow prepares images for model inference. OpenCV is used only if an additional image-processing need is demonstrated.
-4. CLIP compares image representations with curated candidate category/attribute descriptions and returns candidate scores.
-5. PaddleOCR detects and reads text visible in the images.
-6. Attribute processing maps raw candidates to approved vocabulary values, resolves or flags conflicts across images, and preserves unknown values when evidence is insufficient.
-7. Pydantic validates the structured metadata response.
-8. The UI displays predictions with confidence/evidence where available.
-9. The user accepts, edits, or marks fields as unknown.
-10. The final approved values and a record of the prediction/review are saved in PostgreSQL. Image files remain in the configured file storage.
-11. Verified examples can be exported for offline evaluation and future model experiments. Model changes require evaluation before deployment.
+1. **Upload & Ingestion:** The seller uploads one or more images for the same fashion product in the React frontend.
+2. **Backend Validation:** Node.js Express backend validates file formats (JPEG, PNG, WEBP), file sizes, and count, saving files with secure UUIDs to `./uploads`.
+3. **ML Service Invocation:** `mlClient.js` forwards the image batch to the Python ML service (`POST /api/v1/predict`).
+4. **Visual & OCR Inference:**
+   - Pillow verifies and decodes the image batch into memory.
+   - Pretrained CLIP compares images against category and attribute candidate prompts on CPU.
+   - PaddleOCR extracts readable text from labels/tags as corroborating evidence.
+5. **Metadata Assembly & Validation:** Predictions are normalized against the controlled taxonomy and validated by Pydantic before returning to the Node.js backend.
+6. **Presentation & Review:** The frontend renders predictions with clear confidence badges.
+7. **Human Approval & Dual Persistence:** The seller reviews, modifies values, or marks fields unknown. The Express backend saves the final approved product while preserving the original AI prediction run in a separate audit table.
+
+## 2.1 Locked Repository Directory Structure
+
+```text
+project-root/
+│
+├── frontend/                   # React + Vite Client
+│   ├── public/                 # Static assets (favicons, icons)
+│   ├── src/
+│   │   ├── assets/             # Brand logos, SVGs, static media
+│   │   ├── components/         # Reusable UI components (Navbar, ConfidenceBadge)
+│   │   ├── features/           # Feature-specific modules (upload, review, metadata)
+│   │   ├── pages/              # Page views (DashboardPage)
+│   │   ├── layouts/            # Page shell layouts (MainLayout)
+│   │   ├── hooks/              # Custom React hooks (useProductAnalysis)
+│   │   ├── services/           # Backend API integration (Axios client)
+│   │   ├── context/            # Global state context (ProductContext)
+│   │   ├── utils/              # Client-side formatters and helpers
+│   │   ├── App.jsx             # Root application component
+│   │   └── main.jsx            # React DOM bootstrap
+│   ├── package.json
+│   ├── vite.config.js
+│   ├── tailwind.config.js
+│   └── .env.example
+│
+├── backend/                    # Node.js + Express API & BFF
+│   ├── src/
+│   │   ├── config/             # Database, port, and service URLs
+│   │   ├── modules/
+│   │   │   ├── auth/           # Authentication / session controller (open MVP)
+│   │   │   ├── users/          # User profile / role controller
+│   │   │   └── products/       # Product upload, analysis, review controller & service
+│   │   ├── middleware/         # Upload (Multer) and global error handling
+│   │   ├── integrations/
+│   │   │   └── mlClient.js     # HTTP client for Python ML microservice
+│   │   ├── utils/              # Logging and helper utilities
+│   │   ├── app.js              # Express app setup and middleware pipeline
+│   │   └── server.js           # HTTP listener entrypoint
+│   ├── tests/                  # Backend unit and integration tests (Jest/Supertest)
+│   ├── package.json
+│   └── .env.example
+│
+├── ml/                         # Python / ML Service
+│   ├── src/
+│   │   ├── api/                # FastAPI routers (/health, /taxonomy, /predict)
+│   │   ├── data/               # Taxonomy, controlled vocabularies, Pydantic schemas
+│   │   ├── preprocessing/      # Image validation and batch decoding (Pillow)
+│   │   ├── models/             # CLIP model wrapper and loader
+│   │   ├── inference/          # Prediction pipeline (candidate scoring & fusion)
+│   │   ├── training/           # Fine-tuning pipelines (deferred until benchmark need)
+│   │   ├── evaluation/         # Scikit-learn evaluation metrics (accuracy, F1)
+│   │   ├── pipelines/          # End-to-end ML workflow orchestration
+│   │   └── main.py             # FastAPI entrypoint
+│   ├── tests/                  # Pytest test suite (health, schemas, taxonomy)
+│   ├── requirements.txt
+│   └── .env.example
+│
+├── docs/                       # Architecture diagrams and system walkthroughs
+├── scripts/                    # Development launchers (start-dev.bat, start-dev.sh)
+├── context/                    # Durable project requirements, memory, and progress tracker
+├── .gitignore                  # Git ignore rules for Node, Python, and uploads
+└── README.md                   # Repository overview and quickstart guide
+```
 
 ## 3. Attribute and Category Design
 

@@ -31,36 +31,39 @@ The product should:
 
 Never claim these model targets are met until measured on a representative, held-out, manually labeled test set. Split data by product identity to prevent photos of the same item leaking across splits.
 
-## 3. Locked Technology Stack
+## 3. Locked Technology Stack (3-Tier Service Architecture)
 
 | Layer | Selected technology | Intended responsibility |
 |---|---|---|
-| Frontend | React + Vite + TypeScript | Image upload, previews, prediction display, editing and review |
-| Styling | Tailwind CSS | Responsive and consistent UI |
-| Backend API | Python + FastAPI | Upload validation, orchestration, API responses |
-| Visual baseline | Hugging Face Transformers + pretrained CLIP | Zero-shot category and attribute candidate scoring; benchmark before choosing a production model |
-| ML framework | PyTorch | Model inference and possible future fine-tuning |
-| OCR | PaddleOCR | Detect/read text visible in product images; test on representative labels |
-| Image utilities | Pillow; OpenCV only where needed | Decode, validate, resize and prepare images |
-| Schema validation | Pydantic | Validate requests, responses and normalized metadata |
-| Database | PostgreSQL | Product, image-reference, prediction, review and evaluation records |
+| Frontend | React + Vite | Image upload, previews, prediction display, editing, and human review approval |
+| Styling | Tailwind CSS | Responsive, accessible, and consistent UI |
+| Backend API / BFF | Node.js + Express | Upload validation, storage orchestration, PostgreSQL persistence, and client API |
+| ML Integration | `mlClient.js` | Express integration client communicating with the Python ML microservice |
+| ML Microservice | Python + FastAPI | Vision & OCR inference service exposing prediction and health endpoints |
+| Visual baseline | Hugging Face Transformers + pretrained CLIP | Zero-shot category and attribute candidate scoring on CPU |
+| ML framework | PyTorch (CPU) | Model inference and possible future fine-tuning |
+| OCR | PaddleOCR | Detect/read text visible on labels and packaging |
+| Image utilities | Pillow (PIL) | Decode, validate, resize, and prepare image batches |
+| Schema validation | Pydantic | Validate responses, taxonomy, and normalized metadata |
+| Database | PostgreSQL (Neon) | Product, image-reference, prediction, review and evaluation records |
 | Flexible attributes | PostgreSQL JSONB | Store category-specific attributes alongside stable relational fields |
-| Metrics | scikit-learn | Accuracy, precision, recall, F1 and confusion matrices |
-| Image storage (development) | Local filesystem | Store uploads locally; database stores generated paths/references |
+| Metrics | scikit-learn | Accuracy, precision, recall, F1, and confusion matrices |
+| Image storage | Local filesystem (`./uploads`) / Neon Object Storage | Store uploads; database stores generated UUID paths/references |
 
 ## 4. Architecture and Data Flow
 
-1. User uploads one or more images belonging to a single product.
-2. FastAPI validates file format, size, count and actual image decoding.
-3. Pillow prepares images for inference. Preserve the original files; use OpenCV only when a demonstrated need exists.
-4. CLIP compares image/text representations against configured category and attribute candidates.
-5. PaddleOCR extracts text visible on labels or packaging. OCR may fail independently of visual inference.
-6. Attribute processing normalizes candidate values to a controlled vocabulary and handles conflicts among images or evidence sources.
-7. Pydantic validates the resulting versioned metadata schema.
-8. UI shows candidates, available evidence/score, and fields that are unknown, low-confidence or conflicting.
-9. User accepts, edits or marks individual fields unknown, then saves/approves.
-10. PostgreSQL stores product data, image references, original predictions and review events. The image bytes are stored in the configured storage location.
-11. Verified examples may later be exported for offline evaluation and controlled model experiments.
+1. User uploads one or more images belonging to a single fashion product in the React UI.
+2. Node.js Express backend validates file format, size, count, and saves files with UUID filenames to `./uploads`.
+3. `mlClient.js` sends the image batch to the Python ML microservice (`POST /api/v1/predict`).
+4. Pillow verifies and decodes images in memory for inference.
+5. CLIP compares image/text representations against configured category and attribute candidates on CPU.
+6. PaddleOCR extracts text visible on labels or packaging.
+7. Attribute processing normalizes candidate values to a controlled vocabulary and formats results.
+8. Pydantic validates the resulting versioned metadata schema.
+9. UI shows candidates, confidence badges, and fields that are unknown or need review.
+10. User accepts, edits, or marks individual fields unknown, then approves.
+11. PostgreSQL stores product data, image references, original predictions, and review events.
+12. Verified examples may later be exported for offline evaluation and controlled model experiments.
 
 A multi-image upload normally represents **one product with multiple views**, not multiple separate products. Conflicting views or field predictions should be shown for review instead of silently discarded.
 
