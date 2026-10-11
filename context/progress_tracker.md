@@ -2,9 +2,9 @@
 
 > Update this file at the end of each implementation or planning session. Keep stable project context in `memory.md`; this file records current status, next actions, blockers and verified progress.
 
-**Last updated:** 2026-10-10  
-**Overall status:** Planning and requirements defined; implementation progress has not yet been confirmed.  
-**Current phase:** Phase 1 — Project foundation (not started / not verified)
+**Last updated:** 2026-10-11  
+**Overall status:** Phase 1 Foundation complete and live-verified across all 3 tiers. Full CLIP inference and HITL review flow operational. Phase 2 (Image upload & storage persistence) in progress.  
+**Current phase:** Phase 2 — Image upload and storage (IN PROGRESS)
 
 ## 1. Current Snapshot
 
@@ -17,7 +17,7 @@
 | Decision record | Drafted | `Decisions.md`; locked choices and open decisions recorded |
 | UI requirements | Drafted | `UI_Requirements.md`; product and review flow requirements are defined |
 | Milestones | Drafted | `Milestones.md`; seven phases and exit criteria included |
-| Source code / project scaffold | Not confirmed | No implementation tasks are marked complete in this tracker yet |
+| Source code / project scaffold | Verified / Live | 3-tier architecture (`frontend/`, `backend/`, `ml/`) running live via `start-dev.bat`; health and prediction flows validated |
 | Evaluation dataset and results | Not started / not confirmed | No verified benchmark result is recorded here |
 | 95% category accuracy target | Not yet demonstrated | Must be measured on a representative held-out test set |
 | 90% attribute F1 target | Not yet demonstrated | Must be measured using the agreed attribute evaluation policy |
@@ -35,7 +35,7 @@
 ## 3. Implementation Milestones
 
 ### Phase 1 — Project foundation
-**Status: IN PROGRESS / FOUNDATION SCAFFOLDED**
+**Status: DONE / VERIFIED**
 
 - [x] Create the frontend, backend, and ML service project structure according to locked 3-tier skeleton.
 - [x] Set up React + Vite and Tailwind CSS (`frontend/`).
@@ -48,10 +48,10 @@
 - [x] Add automated test suites for backend health and ML schemas/taxonomy.
 - [x] Add development launcher scripts in `scripts/start-dev.bat` and `scripts/start-dev.sh`.
 
-**Exit criteria:** Frontend, backend, and ML service scaffolding complete; health endpoints and schema validation passing.
+**Exit criteria:** Frontend, backend, and ML service scaffolding complete; health endpoints, schema validation, and live cross-service communication passing.
 
 ### Phase 2 — Image upload and storage
-**Status: NOT STARTED / NOT VERIFIED**
+**Status: IN PROGRESS**
 
 - [ ] Build multi-image upload UI for one product.
 - [ ] Show image previews and allow removal before submission.
@@ -130,13 +130,10 @@
 
 Recommended order:
 
-1. Complete the small documentation cleanup above.
-2. Start Phase 1 and create the project scaffold.
-3. Set up the backend environment, frontend application and local PostgreSQL connection.
-4. Decide the first taxonomy and attribute vocabulary before writing model-specific logic.
-5. Make the health endpoint and schema-validation tests pass.
-
-Do not start fine-tuning before a baseline and a sufficient set of verified labels exist.
+1. Advance Phase 2: Build database schema and migrations for `products`, `product_images`, `prediction_runs`, and `review_events` in Neon PostgreSQL.
+2. Complete multi-image upload handling, validation (format, dimensions, max file size), and storage indexing in backend.
+3. Wire frontend upload UI to persist newly created product IDs and link multiple images.
+4. Advance Phase 3 baseline evaluation on a held-out fashion validation sample.
 
 ## 5. Blockers and Open Decisions
 
@@ -161,6 +158,8 @@ Add one entry for any meaningful implementation or evaluation session. Record ex
 | 2026-10-10 | Planning | Resolved open decisions regarding taxonomy, hardware, hosting, dataset, and retention policies | Updated `Decisions.md` and `memory.md` with final vocabulary, hardware (CPU), hosting (Neon), dataset (Hugging Face 70/15/15), and user policies. | Ready to start Phase 1 implementation |
 | 2026-10-11 | Planning / Agent Guidance | Created `context/agent.md` as operational guide and persona specification for AI coding agents | Created `context/agent.md`, updated `memory.md` and `progress_tracker.md` references | None |
 | 2026-10-11 | Phase 1 Foundation | Scaffolded locked 3-tier folder structure (`frontend/`, `backend/`, `ml/`, `scripts/`); implemented health endpoints, `mlClient.js`, Pydantic schemas, and launch scripts | Updated `Architecture.md`, `memory.md`, `agent.md`, and `README.md` with locked 3-tier architecture | Local dependency installation (`npm install`, `pip install`) by developer |
+| 2026-10-11 | Phase 1 Verification | Started all 3 services via `start-dev.bat`; verified Vite on 5173, Express on 5000, and FastAPI CLIP on 8000 | Live health checks (`/api/v1/health`, `/health`) and initial `POST /api/v1/predict` returned `200 OK` | ML cold start required ~1 min for initial Hugging Face CLIP weights download |
+| 2026-10-11 | Phase 1 & 3 UI / HITL | Implemented full attribute prompt suites in ML pipeline; upgraded Review Form to suggest-by-default with amber verification warnings | Pytest `ml/tests/test_health.py` (2 passed); verified live UI pre-populates category, color, pattern, material, sleeve, and neckline | Ready to build Phase 2 database persistence |
 
 ## 7. Session Update Template
 
